@@ -11,7 +11,7 @@ urlpatterns = [
     path('api/', include("core.urls")),
     path('docs/', include_docs_urls(title='API')),
 
-    #token
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    # #token
+    # path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    # path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
