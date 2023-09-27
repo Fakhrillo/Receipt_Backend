@@ -8,6 +8,10 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework_simplejwt.authentication import  JWTAuthentication
 from rest_framework.permissions import IsAdminUser
 
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from pprint import pprint
+
 class BranchesListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAdminUser]
     authentication_classes = [JWTAuthentication]
@@ -58,10 +62,31 @@ class CheckListCreateView(generics.ListCreateAPIView):
         'branch': ['exact'],  # You can also specify 'exact' lookup for branch if needed
     }
 
-    def get_queryset(self):
-        date_filter = self.request.query_params.get('date_filter', None)
+    def list(self, request):
+        date_filter = self.request.query_params.get('date', None)
+        regular = self.request.query_params.get('specific', None)
         start_date = None
         end_date = None
+
+        if regular:
+            try:
+                # Try parsing the date_filter as %Y-%m-%d
+                start_date = datetime.strptime(regular, '%Y-%m-%d')
+                end_date = start_date + timedelta(days=1) - timedelta(seconds=1)
+            except ValueError:
+                try:
+                    # Try parsing the date_filter as %Y-%m
+                    start_date = datetime.strptime(regular, '%Y-%m')
+                    end_date = datetime(year=start_date.year, month=start_date.month + 1, day=1) - timedelta(days=1)
+                except ValueError:
+                    try:
+                        # Try parsing the date_filter as %Y
+                        current_month = datetime.now().month
+                        current_day = datetime.now().day
+                        start_date = datetime.strptime(regular, '%Y')
+                        end_date = datetime(year=start_date.year, month=current_month, day=current_day)
+                    except ValueError:
+                        pass
 
         if date_filter == '1day':
             start_date = datetime.now() - timedelta(days=1)
@@ -70,31 +95,11 @@ class CheckListCreateView(generics.ListCreateAPIView):
         elif date_filter == '1year':
             start_date = datetime.now() - timedelta(days=365)  # Approximation for 1 year
         elif date_filter == 'custom':
-            start_date = self.request.query_params.get('start_date', None)
-            end_date = self.request.query_params.get('end_date', None)
-
-        elif date_filter == 'specific_day':
-            specific_day = self.request.query_params.get('specific_day', None)
-            if specific_day:
-                start_date = datetime.strptime(specific_day, '%Y-%m-%d')
-                end_date = start_date + timedelta(days=1) - timedelta(seconds=1)
-        
-        elif date_filter == 'specific_month':
-            specific_month = self.request.query_params.get('specific_month', None)
-            if specific_month:
-                # Assume the current day
-                current_day = datetime.now().day
-                start_date = datetime.strptime(specific_month, '%Y-%m')
-                end_date = datetime(year=start_date.year, month=start_date.month + 1, day=1) - timedelta(days=1)
-        
-        elif date_filter == 'specific_year':
-            specific_year = self.request.query_params.get('specific_year', None)
-            if specific_year:
-                # Assume the current month and day
-                current_month = datetime.now().month
-                current_day = datetime.now().day
-                start_date = datetime.strptime(specific_year, '%Y')
-                end_date = datetime(year=start_date.year, month=current_month, day=current_day)
+            s_date = self.request.query_params.get('from', None)
+            e_date = self.request.query_params.get('to', None)
+            
+            start_date = datetime.strptime(s_date, '%Y-%m-%d')
+            end_date = datetime.strptime(e_date, '%Y-%m-%d')
 
         elif date_filter == 'check_num':
             check_num = self.request.query_params.get('check_num', None)
@@ -102,12 +107,12 @@ class CheckListCreateView(generics.ListCreateAPIView):
                 queryset = Checks.objects.filter(check_num=check_num)
                 return queryset
         elif date_filter == 'all':
-            return Checks.objects.all() 
-            
+            return Checks.objects.all()
+ 
         else:
             try:
                 keys = list(self.request.query_params.keys())
-                if keys[0] not in ['worker', 'branch']:
+                if keys[0] not in ['worker', 'branch', 'regular']:
                     return Checks.objects.none()
                 else:
                     pass
@@ -117,11 +122,23 @@ class CheckListCreateView(generics.ListCreateAPIView):
         queryset = Checks.objects.all()
 
         if start_date and end_date:
-            queryset = queryset.filter(date__range=[start_date, end_date])
+            queryset = queryset.filter(date__date__gte=start_date, date__date__lte=end_date)
         elif start_date:
             queryset = queryset.filter(date__gte=start_date)
+        
+        total_checks = queryset.count()
+        total_check_sum = queryset.aggregate(Sum('sum'))['sum__sum']
 
-        return queryset
+        b = {'total_checks': total_checks, 'total_sum': total_check_sum}
+
+        a=CheksSerializer(queryset, many=True).data
+
+        data = {
+            'list': a,
+            'sum': b, 
+        }
+
+        return Response(data)
 
 class DocListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAdminUser]
@@ -187,14 +204,12 @@ class DocListCreateView(generics.ListCreateAPIView):
                 return Docs.objects.none()
 
         queryset = Docs.objects.all()
-
         if start_date and end_date:
-            queryset = queryset.filter(date__range=[start_date, end_date])
+            queryset = queryset.filter(date__date__gte=start_date, date__date__lte=end_date)
         elif start_date:
             queryset = queryset.filter(date__gte=start_date)
 
         return queryset
-
 
 class WorkersByBranchListView(generics.ListAPIView):
     permission_classes = [IsAdminUser]
@@ -206,3 +221,59 @@ class WorkersByBranchListView(generics.ListAPIView):
         queryset = Workers.objects.filter(branch_id=branch_id)
         return queryset
     
+class WorkersSummaryView(APIView):
+    permission_classes = [IsAdminUser]
+    authentication_classes = [JWTAuthentication]
+
+    def get(self, request):
+        date_filter = request.query_params.get('date', None)
+        start_date = request.query_params.get('from', None)
+        end_date = request.query_params.get('to', None)
+        branches = request.query_params.get('branch', None)
+
+        selected_date = None
+        if date_filter:
+            try:
+                # Parse the date filter as %Y-%m-%d
+                selected_date = datetime.strptime(date_filter, '%Y-%m-%d')
+            except:
+                try:
+                    # Parse the date filter as %Y-%m-%d
+                    selected_date = datetime.strptime(date_filter, '%Y-%m')
+                except:
+                    try:
+                        # Parse the date filter as %Y-%m-%d
+                        selected_date = datetime.strptime(date_filter, '%Y')
+                    except ValueError:
+                        # Handle invalid date format
+                        return Response({"error": "Invalid date format. Use YYYY-MM-DD."}, status=400)
+        else:
+            pass
+        # Get all workers
+        if branches != 'null':
+            workers = Workers.objects.filter(branch_id=branches)
+        else:
+            workers = Workers.objects.all()
+        summary_data = []
+
+        for worker in workers:
+            # Filter checks for the worker on the specified date
+            if selected_date:
+                worker_checks = Checks.objects.filter(worker=worker, date__date=selected_date.date())
+
+            else:
+                s_date = datetime.strptime(start_date, '%Y-%m-%d')
+                e_date = datetime.strptime(end_date, '%Y-%m-%d')
+                worker_checks = Checks.objects.filter(worker=worker, date__date__gte=s_date, date__date__lte=e_date)
+                
+            total_checks = worker_checks.count()
+            total_check_sum = worker_checks.aggregate(Sum('sum'))['sum__sum']
+            data = {
+                'id': worker.id,
+                'name': worker.name,
+                'total_checks': total_checks,
+                'total_check_sum': total_check_sum,
+                'branch_name': BranchSerializer(worker.branch).data['name']
+            }
+            summary_data.append(data)
+        return Response(summary_data, status=200)

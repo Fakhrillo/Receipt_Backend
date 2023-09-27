@@ -13,4 +13,6 @@ urlpatterns = [
     path('check/', CheckListCreateView.as_view(), name='check_list_create'),
     
     path('doc/', DocListCreateView.as_view(), name='doc_list_create'),
+
+    path('worker_filter/', WorkersSummaryView.as_view(), name='checks-by-date'),
 ]

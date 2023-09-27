@@ -21,9 +21,10 @@ class WorkerSerializer(serializers.ModelSerializer):
         return obj.checks_set.aggregate(Sum('sum'))['sum__sum']  # Sum the 'sum' field of related checks
 
 class CheksSerializer(serializers.ModelSerializer):
+    branch_name = serializers.ReadOnlyField(source='branch.name')  # Add this field to get the branch name
     class Meta:
         model = Checks
-        fields = '__all__'
+        fields = ['id', 'check_num', 'sum', 'date', 'image', 'worker', 'branch', 'branch_name']
     
 class DocsSerializer(serializers.ModelSerializer):
     class Meta:
