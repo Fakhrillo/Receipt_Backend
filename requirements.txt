@@ -8,6 +8,7 @@ coreschema==0.0.4
 Django==4.2.5
 django-admin-interface==0.26.1
 django-colorfield==0.10.1
+django-cors-headers==4.2.0
 django-filter==23.2
 django-storages==1.14
 djangorestframework==3.14.0

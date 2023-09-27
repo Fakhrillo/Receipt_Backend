@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'core',
     'rest_framework',
     'coreapi',
+    'corsheaders',
 ]
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
@@ -47,6 +48,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'check_bot.urls'
@@ -145,3 +149,5 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
 }
+
+CORS_ORIGIN_ALLOW_ALL=True

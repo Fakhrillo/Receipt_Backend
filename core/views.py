@@ -9,39 +9,39 @@ from rest_framework_simplejwt.authentication import  JWTAuthentication
 from rest_framework.permissions import IsAdminUser
 
 class BranchesListCreateView(generics.ListCreateAPIView):
-    # permission_classes = [IsAdminUser]
-    # authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUser]
+    authentication_classes = [JWTAuthentication]
     queryset = Branches.objects.all()
     serializer_class = BranchSerializer
 
 class BranchesListUpdateDeleteRetriveView(generics.RetrieveUpdateDestroyAPIView):
-    # permission_classes = [IsAdminUser]
-    # authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUser]
+    authentication_classes = [JWTAuthentication]
     queryset = Branches.objects.all()
     serializer_class = BranchSerializer
 
 class WorkersListCreateView(generics.ListCreateAPIView):
-    # permission_classes = [IsAdminUser]
-    # authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUser]
+    authentication_classes = [JWTAuthentication]
     queryset = Workers.objects.all()
     serializer_class = WorkerSerializer
 
 class WorkersListUpdateDeleteRetriveView(generics.RetrieveUpdateDestroyAPIView):
-    # permission_classes = [IsAdminUser]
-    # authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUser]
+    authentication_classes = [JWTAuthentication]
     queryset = Workers.objects.all()
     serializer_class = WorkerSerializer
 
 class WorkersListRetriveView(generics.RetrieveAPIView):
-#     permission_classes = [IsAdminUser]
-#     authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUser]
+    authentication_classes = [JWTAuthentication]
     queryset = Workers.objects.all()
     serializer_class = WorkerSerializer
     lookup_field = 'phone_number'
 
 class WorkersListByID(generics.RetrieveAPIView):
-    # permission_classes = [IsAdminUser]
-    # authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUser]
+    authentication_classes = [JWTAuthentication]
     queryset = Workers.objects.all()
     serializer_class = WorkerSerializer
     lookup_field = 'id_tg'
@@ -49,8 +49,8 @@ class WorkersListByID(generics.RetrieveAPIView):
 class CheckListCreateView(generics.ListCreateAPIView):
     serializer_class = CheksSerializer
 
-    # permission_classes = [IsAdminUser]
-    # authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUser]
+    authentication_classes = [JWTAuthentication]
 
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = {
@@ -124,8 +124,8 @@ class CheckListCreateView(generics.ListCreateAPIView):
         return queryset
 
 class DocListCreateView(generics.ListCreateAPIView):
-    # permission_classes = [IsAdminUser]
-    # authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUser]
+    authentication_classes = [JWTAuthentication]
 
     serializer_class = DocsSerializer
 
@@ -197,8 +197,8 @@ class DocListCreateView(generics.ListCreateAPIView):
 
 
 class WorkersByBranchListView(generics.ListAPIView):
-    # permission_classes = [IsAdminUser]
-    # authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUser]
+    authentication_classes = [JWTAuthentication]
     serializer_class = WorkerSerializer
 
     def get_queryset(self):
