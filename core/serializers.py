@@ -22,11 +22,14 @@ class WorkerSerializer(serializers.ModelSerializer):
 
 class CheksSerializer(serializers.ModelSerializer):
     branch_name = serializers.ReadOnlyField(source='branch.name')  # Add this field to get the branch name
+    worker_name = serializers.ReadOnlyField(source='worker.name')  # Add this field to get the worker name
     class Meta:
         model = Checks
-        fields = ['id', 'check_num', 'sum', 'date', 'image', 'worker', 'branch', 'branch_name']
+        fields = ['id', 'check_num', 'sum', 'date', 'image', 'worker', 'worker_name', 'branch', 'branch_name']
     
 class DocsSerializer(serializers.ModelSerializer):
+    branch_name = serializers.ReadOnlyField(source='branch.name')  # Add this field to get the branch name
+    worker_name = serializers.ReadOnlyField(source='worker.name')  # Add this field to get the worker name
     class Meta:
         model = Docs
-        fields = '__all__'
+        fields = ['id', 'doc_num', 'date', 'image', 'worker', 'worker_name', 'branch', 'branch_name']

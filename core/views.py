@@ -64,6 +64,7 @@ class CheckListCreateView(generics.ListCreateAPIView):
     def list(self, request):
         date_filter = self.request.query_params.get('date', None)
         regular = self.request.query_params.get('specific', None)
+        worker_filter = self.request.query_params.get('worker', None)  # Add worker filter
         start_date = None
         end_date = None
 
@@ -105,7 +106,14 @@ class CheckListCreateView(generics.ListCreateAPIView):
             if check_num:
                 queryset = Checks.objects.filter(check_num=check_num)
                 a=CheksSerializer(queryset, many=True).data
+                
+                # If the first result is empty, try the second queryset
+                if not a:
+                    queryset = Docs.objects.filter(doc_num=check_num)
+                    a = DocsSerializer(queryset, many=True).data
+                # Return the result a
                 return Response(a)
+            
         elif date_filter == 'all':
             return Checks.objects.all()
  
@@ -120,9 +128,14 @@ class CheckListCreateView(generics.ListCreateAPIView):
                 return Checks.objects.none()
 
         queryset = Checks.objects.all()
+        worker = Workers.objects.get(id=worker_filter)
+        worker_data = WorkerSerializer(worker).data
 
         if start_date and end_date:
-            queryset = queryset.filter(date__date__gte=start_date, date__date__lte=end_date)
+            if worker_filter:
+                queryset = queryset.filter(date__date__gte=start_date, date__date__lte=end_date, worker_id=worker_filter)
+            else:
+                queryset = queryset.filter(date__date__gte=start_date, date__date__lte=end_date)
         elif start_date:
             queryset = queryset.filter(date__gte=start_date)
         
@@ -136,6 +149,7 @@ class CheckListCreateView(generics.ListCreateAPIView):
         data = {
             'list': a,
             'sum': b,
+            'worker_name': worker_data['name'],
         }
 
         return Response(data)
@@ -326,6 +340,8 @@ class BranchesSummaryView(APIView):
                 
             total_checks = branch_checks.count()
             total_check_sum = branch_checks.aggregate(Sum('sum'))['sum__sum']
+            if total_check_sum == None:
+                total_check_sum = 0
             data = {
                 'id': branch.id,
                 'name': branch.name,
