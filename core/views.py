@@ -10,7 +10,6 @@ from rest_framework.permissions import IsAdminUser
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from pprint import pprint
 
 class BranchesListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAdminUser]
@@ -105,7 +104,8 @@ class CheckListCreateView(generics.ListCreateAPIView):
             check_num = self.request.query_params.get('check_num', None)
             if check_num:
                 queryset = Checks.objects.filter(check_num=check_num)
-                return queryset
+                a=CheksSerializer(queryset, many=True).data
+                return Response(a)
         elif date_filter == 'all':
             return Checks.objects.all()
  
@@ -135,7 +135,7 @@ class CheckListCreateView(generics.ListCreateAPIView):
 
         data = {
             'list': a,
-            'sum': b, 
+            'sum': b,
         }
 
         return Response(data)
@@ -268,6 +268,8 @@ class WorkersSummaryView(APIView):
                 
             total_checks = worker_checks.count()
             total_check_sum = worker_checks.aggregate(Sum('sum'))['sum__sum']
+            if total_check_sum == None:
+                total_check_sum = 0
             data = {
                 'id': worker.id,
                 'name': worker.name,
@@ -276,4 +278,61 @@ class WorkersSummaryView(APIView):
                 'branch_name': BranchSerializer(worker.branch).data['name']
             }
             summary_data.append(data)
-        return Response(summary_data, status=200)
+        
+        sorted_list_desc = sorted(summary_data, key=lambda x: x['total_check_sum'], reverse=True)
+        return Response(sorted_list_desc, status=200)
+
+class BranchesSummaryView(APIView):
+    permission_classes = [IsAdminUser]
+    authentication_classes = [JWTAuthentication]
+
+    def get(self, request):
+        date_filter = request.query_params.get('date', None)
+        start_date = request.query_params.get('from', None)
+        end_date = request.query_params.get('to', None)
+
+        selected_date = None
+        if date_filter:
+            try:
+                # Parse the date filter as %Y-%m-%d
+                selected_date = datetime.strptime(date_filter, '%Y-%m-%d')
+            except:
+                try:
+                    # Parse the date filter as %Y-%m-%d
+                    selected_date = datetime.strptime(date_filter, '%Y-%m')
+                except:
+                    try:
+                        # Parse the date filter as %Y-%m-%d
+                        selected_date = datetime.strptime(date_filter, '%Y')
+                    except ValueError:
+                        # Handle invalid date format
+                        return Response({"error": "Invalid date format. Use YYYY-MM-DD."}, status=400)
+        else:
+            pass
+        
+        
+        branches = Branches.objects.all()
+        summary_data = []
+
+        for branch in branches:
+            # Filter checks for the worker on the specified date
+            if selected_date:
+                branch_checks = Checks.objects.filter(branch=branch, date__date=selected_date.date())
+
+            else:
+                s_date = datetime.strptime(start_date, '%Y-%m-%d')
+                e_date = datetime.strptime(end_date, '%Y-%m-%d')
+                branch_checks = Checks.objects.filter(branch=branch, date__date__gte=s_date, date__date__lte=e_date)
+                
+            total_checks = branch_checks.count()
+            total_check_sum = branch_checks.aggregate(Sum('sum'))['sum__sum']
+            data = {
+                'id': branch.id,
+                'name': branch.name,
+                'total_checks': total_checks,
+                'total_check_sum': total_check_sum,
+            }
+
+            summary_data.append(data)
+        sorted_list_desc = sorted(summary_data, key=lambda x: x['total_check_sum'], reverse=True)
+        return Response(sorted_list_desc, status=200)

@@ -15,4 +15,5 @@ urlpatterns = [
     path('doc/', DocListCreateView.as_view(), name='doc_list_create'),
 
     path('worker_filter/', WorkersSummaryView.as_view(), name='checks-by-date'),
+    path('branch_filter/', BranchesSummaryView.as_view(), name='branch_filter'),
 ]
