@@ -15,7 +15,7 @@ class Workers(models.Model):
     name = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=155, unique=True)
     branch = models.ForeignKey(Branches, on_delete=models.CASCADE)
-    id_tg = models.IntegerField(null=True, blank=True)
+    id_tg = models.BigIntegerField(null=True, blank=True)
 
     class Meta:
         verbose_name_plural = "Workers"
