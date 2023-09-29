@@ -24,8 +24,8 @@ class Workers(models.Model):
         return self.name
 
 class Checks(models.Model):
-    check_num = models.CharField(max_length=100, unique=True)
-    sum = models.CharField(max_length=155)
+    check_num = models.CharField(max_length=255, unique=True)
+    sum = models.CharField(max_length=255)
     date = models.DateTimeField(auto_now_add=True)
     worker = models.ForeignKey(Workers, null=True, on_delete=models.SET_NULL)
     branch = models.ForeignKey(Branches, on_delete=models.CASCADE)
@@ -38,7 +38,7 @@ class Checks(models.Model):
         return self.check_num
 
 class Docs(models.Model):
-    doc_num = models.CharField(max_length=100, unique=True)
+    doc_num = models.CharField(max_length=255, unique=True)
     date = models.DateTimeField(auto_now_add=True)
     worker = models.ForeignKey(Workers, null=True, on_delete=models.SET_NULL)
     branch = models.ForeignKey(Branches, on_delete=models.CASCADE)
