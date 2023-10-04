@@ -104,18 +104,18 @@ class CheckListCreateView(generics.ListCreateAPIView):
         elif date_filter == 'check_num':
             check_num = self.request.query_params.get('check_num', None)
             if check_num:
-                queryset = Checks.objects.filter(check_num=check_num)
+                queryset = Checks.objects.filter(check_num=check_num, issubmitted=True)
                 a=CheksSerializer(queryset, many=True).data
                 
                 # If the first result is empty, try the second queryset
                 if not a:
-                    queryset = Docs.objects.filter(doc_num=check_num)
+                    queryset = Docs.objects.filter(doc_num=check_num, issubmitted=True)
                     a = DocsSerializer(queryset, many=True).data
                 # Return the result a
                 return Response(a)
             
         elif date_filter == 'all':
-            return Checks.objects.all()
+            return Checks.objects.filter(issubmitted=True)
  
         else:
             try:
@@ -127,7 +127,7 @@ class CheckListCreateView(generics.ListCreateAPIView):
             except:
                 return Checks.objects.none()
 
-        queryset = Checks.objects.all()
+        queryset = Checks.objects.filter(issubmitted=True)
         worker = Workers.objects.get(id=worker_filter)
         worker_data = WorkerSerializer(worker).data
 
@@ -203,10 +203,10 @@ class DocListCreateView(generics.ListCreateAPIView):
         elif date_filter == 'doc_num':
             doc_num = self.request.query_params.get('doc_num', None)
             if doc_num:
-                queryset = Docs.objects.filter(doc_num=doc_num)
+                queryset = Docs.objects.filter(doc_num=doc_num, issubmitted=True)
                 return queryset
         elif date_filter == 'all':
-            return Docs.objects.all()
+            return Docs.objects.filter(issubmitted=True)
         else:
             try:
                 keys = list(self.request.query_params.keys())
@@ -217,7 +217,7 @@ class DocListCreateView(generics.ListCreateAPIView):
             except:
                 return Docs.objects.none()
 
-        queryset = Docs.objects.all()
+        queryset = Docs.objects.filter(issubmitted=True)
         if start_date and end_date:
             queryset = queryset.filter(date__date__gte=start_date, date__date__lte=end_date)
         elif start_date:
@@ -273,12 +273,12 @@ class WorkersSummaryView(APIView):
         for worker in workers:
             # Filter checks for the worker on the specified date
             if selected_date:
-                worker_checks = Checks.objects.filter(worker=worker, date__date=selected_date.date())
+                worker_checks = Checks.objects.filter(worker=worker, date__date=selected_date.date(), issubmitted=True)
 
             else:
                 s_date = datetime.strptime(start_date, '%Y-%m-%d')
                 e_date = datetime.strptime(end_date, '%Y-%m-%d')
-                worker_checks = Checks.objects.filter(worker=worker, date__date__gte=s_date, date__date__lte=e_date)
+                worker_checks = Checks.objects.filter(worker=worker, date__date__gte=s_date, date__date__lte=e_date, issubmitted=True)
                 
             total_checks = worker_checks.count()
             total_check_sum = worker_checks.aggregate(Sum('sum'))['sum__sum']
@@ -331,12 +331,12 @@ class BranchesSummaryView(APIView):
         for branch in branches:
             # Filter checks for the worker on the specified date
             if selected_date:
-                branch_checks = Checks.objects.filter(branch=branch, date__date=selected_date.date())
+                branch_checks = Checks.objects.filter(branch=branch, date__date=selected_date.date(), issubmitted=True)
 
             else:
                 s_date = datetime.strptime(start_date, '%Y-%m-%d')
                 e_date = datetime.strptime(end_date, '%Y-%m-%d')
-                branch_checks = Checks.objects.filter(branch=branch, date__date__gte=s_date, date__date__lte=e_date)
+                branch_checks = Checks.objects.filter(branch=branch, date__date__gte=s_date, date__date__lte=e_date, issubmitted=True)
                 
             total_checks = branch_checks.count()
             total_check_sum = branch_checks.aggregate(Sum('sum'))['sum__sum']
@@ -352,3 +352,9 @@ class BranchesSummaryView(APIView):
             summary_data.append(data)
         sorted_list_desc = sorted(summary_data, key=lambda x: x['total_check_sum'], reverse=True)
         return Response(sorted_list_desc, status=200)
+    
+class EditedTextsCheck(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAdminUser]
+    authentication_classes = [JWTAuthentication]
+    queryset = Checks.objects.filter(issubmitted=False)
+    serializer_class = EditedChecksSerializer

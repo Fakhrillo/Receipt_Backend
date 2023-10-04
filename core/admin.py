@@ -9,10 +9,10 @@ class WorkerAdmin(admin.ModelAdmin):
     list_display_links = ['name', 'branch', ]
 
 class ChecksAdmin(admin.ModelAdmin):
-    list_display = ['check_num', 'sum', 'worker', 'branch', 'date', 'image',]
+    list_display = ['check_num', 'sum', 'worker', 'branch', 'date', 'image', 'issubmited',]
 
 class DocsAdmin(admin.ModelAdmin):
-    list_display = ['doc_num', 'worker', 'branch', 'date', 'image',]
+    list_display = ['doc_num', 'worker', 'branch', 'date', 'image', 'issubmited',]
 
 
 admin.site.register(Branches, BranchAdmin)

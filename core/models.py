@@ -17,6 +17,7 @@ class Workers(models.Model):
     branch = models.ForeignKey(Branches, on_delete=models.CASCADE)
     id_tg = models.BigIntegerField(null=True, blank=True)
 
+
     class Meta:
         verbose_name_plural = "Workers"
 
@@ -30,6 +31,7 @@ class Checks(models.Model):
     worker = models.ForeignKey(Workers, null=True, on_delete=models.SET_NULL)
     branch = models.ForeignKey(Branches, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='media/')
+    issubmitted = models.BooleanField(default=True)
 
     class Meta:
         verbose_name_plural = "Checks"
@@ -43,6 +45,7 @@ class Docs(models.Model):
     worker = models.ForeignKey(Workers, null=True, on_delete=models.SET_NULL)
     branch = models.ForeignKey(Branches, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='media/')
+    issubmitted = models.BooleanField(default=True)
 
     class Meta:
         verbose_name_plural = "Docs"
