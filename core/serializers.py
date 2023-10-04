@@ -25,7 +25,7 @@ class CheksSerializer(serializers.ModelSerializer):
     worker_name = serializers.ReadOnlyField(source='worker.name')  # Add this field to get the worker name
     class Meta:
         model = Checks
-        fields = ['id', 'check_num', 'sum', 'date', 'image', 'worker', 'worker_name', 'branch', 'branch_name']
+        fields = ['id', 'check_num', 'sum', 'date', 'image', 'worker', 'worker_name', 'branch', 'branch_name', 'issubmitted']
 
 class EditedChecksSerializer(serializers.ModelSerializer):
     branch_name = serializers.ReadOnlyField(source='branch.name')  # Add this field to get the branch name
@@ -33,11 +33,11 @@ class EditedChecksSerializer(serializers.ModelSerializer):
     worker_tg_id = serializers.ReadOnlyField(source='worker.id_tg') # Add this field to get the worker telegram ID
     class Meta:
         model = Checks
-        fields = ['id', 'check_num', 'sum', 'date', 'image', 'worker', 'worker_name', 'worker_tg_id', 'branch', 'branch_name']        
+        fields = ['id', 'check_num', 'sum', 'date', 'image', 'worker', 'worker_name', 'worker_tg_id', 'branch', 'branch_name', 'issubmitted']        
     
 class DocsSerializer(serializers.ModelSerializer):
     branch_name = serializers.ReadOnlyField(source='branch.name')  # Add this field to get the branch name
     worker_name = serializers.ReadOnlyField(source='worker.name')  # Add this field to get the worker name
     class Meta:
         model = Docs
-        fields = ['id', 'doc_num', 'date', 'image', 'worker', 'worker_name', 'branch', 'branch_name']
+        fields = ['id', 'doc_num', 'date', 'image', 'worker', 'worker_name', 'branch', 'branch_name', 'issubmitted']
