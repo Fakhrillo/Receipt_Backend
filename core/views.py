@@ -358,3 +358,12 @@ class EditedTextsCheck(generics.RetrieveUpdateDestroyAPIView):
     authentication_classes = [JWTAuthentication]
     queryset = Checks.objects.filter(issubmitted=False)
     serializer_class = EditedChecksSerializer
+
+class EditedChecksAll(APIView):
+    permission_classes = [IsAdminUser]
+    authentication_classes = [JWTAuthentication]
+    
+    def get(self, request):
+        checks = Checks.objects.filter(issubmitted=False)
+        serializers = EditedChecksSerializer(checks, many=True).data
+        return Response(serializers, status=200)

@@ -11,7 +11,8 @@ urlpatterns = [
     path('worker/id/<int:id_tg>', WorkersListByID.as_view(), name='worker_check_by_id'),
     
     path('check/', CheckListCreateView.as_view(), name='check_list_create'),
-    path('edited_checks/', EditedTextsCheck.as_view(), name='edited_checks'),
+    path('edited_all/', EditedChecksAll.as_view(), name='edited_all'),
+    path('edited_checks/<int:pk>', EditedTextsCheck.as_view(), name='edited_checks'),
     
     path('doc/', DocListCreateView.as_view(), name='doc_list_create'),
 
