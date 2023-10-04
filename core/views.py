@@ -366,4 +366,9 @@ class EditedChecksAll(APIView):
     def get(self, request):
         checks = Checks.objects.filter(issubmitted=False)
         serializers = EditedChecksSerializer(checks, many=True).data
-        return Response(serializers, status=200)
+        count = checks.count()
+        data = {
+            'list': serializers,
+            'count': count,
+        }
+        return Response(data, status=200)
