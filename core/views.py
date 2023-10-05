@@ -383,6 +383,6 @@ class UserMessage(APIView):
         url = f'https://api.telegram.org/bot{bot_token}/sendMessage?chat_id={user_id}&text={message}'
         response = requests.get(url)
         if response.status_code == 200:
-            return ('succes')
+            return Response('succes')
         else:
-            return (f'Error sending message: {response.status_code}')
+            return Response(f'Error sending message: {response.status_code}')
