@@ -376,11 +376,13 @@ class EditedChecksAll(APIView):
         return Response(data, status=200)
 
 class UserMessage(APIView):
+    permission_classes = [IsAdminUser]
+    authentication_classes = [JWTAuthentication]
     def get(self, request):
         message = request.query_params.get('message', None)
         user_id = request.query_params.get('id', None)
         bot_token = '6642459129:AAGfTt40wSnX6wJFgcC9iwsPSfOAhWLf_Do'
-        url = f'https://api.telegram.org/bot{bot_token}/sendMessage?chat_id={user_id}&text={message}'
+        url = f'https://api.telegram.org/bot{bot_token}/sendMessage?chat_id={user_id}&text={message}&parse_mode=HTML'
         response = requests.get(url)
         if response.status_code == 200:
             return Response('succes')
