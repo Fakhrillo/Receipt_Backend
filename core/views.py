@@ -389,10 +389,3 @@ class UserMessage(APIView):
         else:
             return Response(f'Error sending message: {response.status_code}')
         
-class Submitted(APIView):
-    def get(self, request):
-        docs = Docs.objects.filter(issubmitted=False)
-        for doc in docs:
-            doc.issubmitted = True
-            doc.save()
-        return Response('All docs are submitted now.', status=200)

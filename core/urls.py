@@ -20,6 +20,4 @@ urlpatterns = [
     path('branch_filter/', BranchesSummaryView.as_view(), name='branch_filter'),
 
     path('send_message/', UserMessage.as_view(), name='send_message'),
-    
-    path('submmitted_docs/', Submitted.as_view(), name='submitted'),
 ]
