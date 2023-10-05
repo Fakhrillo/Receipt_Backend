@@ -18,4 +18,6 @@ urlpatterns = [
 
     path('worker_filter/', WorkersSummaryView.as_view(), name='checks-by-date'),
     path('branch_filter/', BranchesSummaryView.as_view(), name='branch_filter'),
+
+    path('send_message/', UserMessage.as_view(), name='send_message')
 ]

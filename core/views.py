@@ -1,6 +1,8 @@
 from rest_framework import generics, filters
 from .models import *
 from .serializers import *
+import requests
+from decouple import config
 
 from datetime import datetime, timedelta
 from django_filters.rest_framework import DjangoFilterBackend
@@ -372,3 +374,15 @@ class EditedChecksAll(APIView):
             'count': count,
         }
         return Response(data, status=200)
+
+class UserMessage(APIView):
+    def get(self, request):
+        message = request.query_params.get('message', None)
+        user_id = request.query_params.get('id', None)
+        bot_token = config('bot_token')
+        url = f'https://api.telegram.org/bot{bot_token}/sendMessage?chat_id={user_id}&text={message}'
+        response = requests.get(url)
+        if response.status_code == 200:
+            return ('succes')
+        else:
+            return (f'Error sending message: {response.status_code}')
