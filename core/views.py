@@ -372,7 +372,7 @@ class EditedChecksAll(APIView):
         docs = Docs.objects.filter(issubmitted=False)
         serializers_doc = EditedDocsSerializer(docs, many=True).data
 
-        count = checks.count()
+        count = checks.count() + docs.count()
         data = {
             'list': serializers_check + serializers_doc,
             'count': count,
