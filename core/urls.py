@@ -15,6 +15,7 @@ urlpatterns = [
     path('edited_checks/<int:pk>', EditedTextsCheck.as_view(), name='edited_checks'),
     
     path('doc/', DocListCreateView.as_view(), name='doc_list_create'),
+    path('edited_docs/<int:pk>', EditedTextsDoc.as_view(), name='edited_doc'),
 
     path('worker_filter/', WorkersSummaryView.as_view(), name='checks-by-date'),
     path('branch_filter/', BranchesSummaryView.as_view(), name='branch_filter'),

@@ -367,10 +367,14 @@ class EditedChecksAll(APIView):
     
     def get(self, request):
         checks = Checks.objects.filter(issubmitted=False)
-        serializers = EditedChecksSerializer(checks, many=True).data
+        serializers_check = EditedChecksSerializer(checks, many=True).data
+
+        docs = Docs.objects.filter(issubmitted=False)
+        serializers_doc = EditedDocsSerializer(docs, many=True).data
+
         count = checks.count()
         data = {
-            'list': serializers,
+            'list': serializers_check + serializers_doc,
             'count': count,
         }
         return Response(data, status=200)
@@ -389,3 +393,8 @@ class UserMessage(APIView):
         else:
             return Response(f'Error sending message: {response.status_code}')
         
+class EditedTextsDoc(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAdminUser]
+    authentication_classes = [JWTAuthentication]
+    queryset = Docs.objects.filter(issubmitted=False)
+    serializer_class = EditedDocsSerializer
