@@ -47,5 +47,5 @@ class EditedDocsSerializer(serializers.ModelSerializer):
     worker_name = serializers.ReadOnlyField(source='worker.name')  # Add this field to get the worker name
     worker_tg_id = serializers.ReadOnlyField(source='worker.id_tg') # Add this field to get the worker telegram ID
     class Meta:
-        model = Checks
+        model = Docs
         fields = ['id', 'doc_num', 'date', 'image', 'worker', 'worker_name', 'worker_tg_id', 'branch', 'branch_name', 'issubmitted']        
