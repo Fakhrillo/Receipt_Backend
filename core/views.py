@@ -151,6 +151,7 @@ class CheckListCreateView(generics.ListCreateAPIView):
         data = {
             'list': a,
             'sum': b,
+            'type': 'check',
             'worker_name': worker_data['name'],
         }
 
@@ -255,6 +256,7 @@ class DocListCreateView(generics.ListCreateAPIView):
         data = {
             'list': a,
             'sum': b,
+            'type': 'doc',
             'worker_name': worker_data['name'],
         }
 
