@@ -157,18 +157,43 @@ class CheckListCreateView(generics.ListCreateAPIView):
         return Response(data)
 
 class DocListCreateView(generics.ListCreateAPIView):
+    serializer_class = WorkerSerializer
+
     permission_classes = [IsAdminUser]
     authentication_classes = [JWTAuthentication]
 
-    serializer_class = DocsSerializer
-
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    filterset_fields = ['worker', 'branch']  # Add any additional filtering fields you need
+    filterset_fields = {
+        'worker': ['exact'],  # Use 'exact' lookup for worker foreign key
+        'branch': ['exact'],  # You can also specify 'exact' lookup for branch if needed
+    }
 
-    def get_queryset(self):
-        date_filter = self.request.query_params.get('date_filter', None)
+    def list(self, request):
+        date_filter = self.request.query_params.get('date', None)
+        regular = self.request.query_params.get('specific', None)
+        worker_filter = self.request.query_params.get('worker', None)  # Add worker filter
         start_date = None
         end_date = None
+
+        if regular:
+            try:
+                # Try parsing the date_filter as %Y-%m-%d
+                start_date = datetime.strptime(regular, '%Y-%m-%d')
+                end_date = start_date + timedelta(days=1) - timedelta(seconds=1)
+            except ValueError:
+                try:
+                    # Try parsing the date_filter as %Y-%m
+                    start_date = datetime.strptime(regular, '%Y-%m')
+                    end_date = datetime(year=start_date.year, month=start_date.month + 1, day=1) - timedelta(days=1)
+                except ValueError:
+                    try:
+                        # Try parsing the date_filter as %Y
+                        current_month = datetime.now().month
+                        current_day = datetime.now().day
+                        start_date = datetime.strptime(regular, '%Y')
+                        end_date = datetime(year=start_date.year, month=current_month, day=current_day)
+                    except ValueError:
+                        pass
 
         if date_filter == '1day':
             start_date = datetime.now() - timedelta(days=1)
@@ -177,42 +202,32 @@ class DocListCreateView(generics.ListCreateAPIView):
         elif date_filter == '1year':
             start_date = datetime.now() - timedelta(days=365)  # Approximation for 1 year
         elif date_filter == 'custom':
-            start_date = self.request.query_params.get('start_date', None)
-            end_date = self.request.query_params.get('end_date', None)
-        elif date_filter == 'specific_day':
-            specific_day = self.request.query_params.get('specific_day', None)
-            if specific_day:
-                start_date = datetime.strptime(specific_day, '%Y-%m-%d')
-                end_date = start_date + timedelta(days=1) - timedelta(seconds=1)
-        
-        elif date_filter == 'specific_month':
-            specific_month = self.request.query_params.get('specific_month', None)
-            if specific_month:
-                # Assume the current day
-                current_day = datetime.now().day
-                start_date = datetime.strptime(specific_month, '%Y-%m')
-                end_date = datetime(year=start_date.year, month=start_date.month + 1, day=1) - timedelta(days=1)
-        
-        elif date_filter == 'specific_year':
-            specific_year = self.request.query_params.get('specific_year', None)
-            if specific_year:
-                # Assume the current month and day
-                current_month = datetime.now().month
-                current_day = datetime.now().day
-                start_date = datetime.strptime(specific_year, '%Y')
-                end_date = datetime(year=start_date.year, month=current_month, day=current_day)
+            s_date = self.request.query_params.get('from', None)
+            e_date = self.request.query_params.get('to', None)
             
+            start_date = datetime.strptime(s_date, '%Y-%m-%d')
+            end_date = datetime.strptime(e_date, '%Y-%m-%d')
+
         elif date_filter == 'doc_num':
             doc_num = self.request.query_params.get('doc_num', None)
             if doc_num:
                 queryset = Docs.objects.filter(doc_num=doc_num, issubmitted=True)
-                return queryset
+                a=DocsSerializer(queryset, many=True).data
+                
+                # If the first result is empty, try the second queryset
+                if not a:
+                    queryset = Docs.objects.filter(doc_num=doc_num, issubmitted=True)
+                    a = DocsSerializer(queryset, many=True).data
+                # Return the result a
+                return Response(a)
+            
         elif date_filter == 'all':
             return Docs.objects.filter(issubmitted=True)
+ 
         else:
             try:
                 keys = list(self.request.query_params.keys())
-                if keys[0] not in ['worker', 'branch']:
+                if keys[0] not in ['worker', 'branch', 'regular']:
                     return Docs.objects.none()
                 else:
                     pass
@@ -220,12 +235,30 @@ class DocListCreateView(generics.ListCreateAPIView):
                 return Docs.objects.none()
 
         queryset = Docs.objects.filter(issubmitted=True)
+        worker = Workers.objects.get(id=worker_filter)
+        worker_data = WorkerSerializer(worker).data
+
         if start_date and end_date:
-            queryset = queryset.filter(date__date__gte=start_date, date__date__lte=end_date)
+            if worker_filter:
+                queryset = queryset.filter(date__date__gte=start_date, date__date__lte=end_date, worker_id=worker_filter)
+            else:
+                queryset = queryset.filter(date__date__gte=start_date, date__date__lte=end_date)
         elif start_date:
             queryset = queryset.filter(date__gte=start_date)
+        
+        total_checks = queryset.count()
 
-        return queryset
+        b = {'total_checks': total_checks}
+
+        a=DocsSerializer(queryset, many=True).data
+
+        data = {
+            'list': a,
+            'sum': b,
+            'worker_name': worker_data['name'],
+        }
+
+        return Response(data)
 
 class WorkersByBranchListView(generics.ListAPIView):
     permission_classes = [IsAdminUser]
