@@ -117,17 +117,19 @@ class CheckListCreateView(generics.ListCreateAPIView):
                 return Response(a)
             
         elif date_filter == 'all':
-            return Checks.objects.filter(issubmitted=True)
- 
+            queryset = Checks.objects.filter(issubmitted=True)
+            a=CheksSerializer(queryset, many=True).data
+            return Response(a)
+        
         else:
             try:
                 keys = list(self.request.query_params.keys())
                 if keys[0] not in ['worker', 'branch', 'regular']:
-                    return Checks.objects.none()
+                    return Response('Bad request, Please correct endpoint', status=400)
                 else:
                     pass
             except:
-                return Checks.objects.none()
+                return Response('Bad request, Please correct endpoint', status=400)
 
         queryset = Checks.objects.filter(issubmitted=True)
         worker = Workers.objects.get(id=worker_filter)
@@ -225,17 +227,19 @@ class DocListCreateView(generics.ListCreateAPIView):
                 return Response(a)
             
         elif date_filter == 'all':
-            return Docs.objects.filter(issubmitted=True)
+            queryset = Docs.objects.filter(issubmitted=True)
+            a = DocsSerializer(queryset, many=True).data
+            return Response(a)
  
         else:
             try:
                 keys = list(self.request.query_params.keys())
                 if keys[0] not in ['worker', 'branch', 'regular']:
-                    return Docs.objects.none()
+                    return Response('Bad request, Please correct endpoint', status=400)
                 else:
                     pass
             except:
-                return Docs.objects.none()
+                return Response('Bad request, Please correct endpoint', status=400)
 
         queryset = Docs.objects.filter(issubmitted=True)
         worker = Workers.objects.get(id=worker_filter)
