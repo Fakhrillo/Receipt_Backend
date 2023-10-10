@@ -160,7 +160,7 @@ class CheckListCreateView(generics.ListCreateAPIView):
         return Response(data)
 
 class DocListCreateView(generics.ListCreateAPIView):
-    serializer_class = WorkerSerializer
+    serializer_class = DocsSerializer
 
     permission_classes = [IsAdminUser]
     authentication_classes = [JWTAuthentication]
