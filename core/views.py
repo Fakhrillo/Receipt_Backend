@@ -168,7 +168,9 @@ class DocListCreateView(generics.ListCreateAPIView):
         'worker': ['exact'],  # Use 'exact' lookup for worker foreign key
         'branch': ['exact'],  # You can also specify 'exact' lookup for branch if needed
     }
-
+    def create(self, request, *args, **kwargs):
+        print(self.request)  
+        return super().create(request, *args, **kwargs)
     def list(self, request):
         date_filter = self.request.query_params.get('date', None)
         regular = self.request.query_params.get('specific', None)
