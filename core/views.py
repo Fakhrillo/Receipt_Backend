@@ -457,7 +457,7 @@ class ImportXlsxFile(APIView):
     permission_classes = [IsAdminUser]
     authentication_classes = [JWTAuthentication]
 
-    def get(self, request):
+    def post(self, request):
         if request.method == 'POST':
             uploaded_file = request.FILES.get('file')
 
