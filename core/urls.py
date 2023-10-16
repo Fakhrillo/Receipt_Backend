@@ -21,4 +21,6 @@ urlpatterns = [
     path('branch_filter/', BranchesSummaryView.as_view(), name='branch_filter'),
 
     path('send_message/', UserMessage.as_view(), name='send_message'),
+
+    path('import_file/', ImportXlsxFile.as_view(), name='import_file'),
 ]

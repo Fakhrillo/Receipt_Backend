@@ -2,7 +2,7 @@ from rest_framework import generics, filters
 from .models import *
 from .serializers import *
 import requests
-from decouple import config
+import pandas as pd
 
 from datetime import datetime, timedelta
 from django_filters.rest_framework import DjangoFilterBackend
@@ -451,3 +451,41 @@ class EditedTextsDoc(generics.RetrieveUpdateDestroyAPIView):
     authentication_classes = [JWTAuthentication]
     queryset = Docs.objects.filter(issubmitted=False)
     serializer_class = EditedDocsSerializer
+
+
+class ImportXlsxFile(APIView):
+    permission_classes = [IsAdminUser]
+    authentication_classes = [JWTAuthentication]
+
+    def get(self, request):
+        if request.method == 'POST':
+            uploaded_file = request.FILES.get('file')
+
+            if not uploaded_file:
+                return Response({'error': 'No file provided'}, status=400)
+
+            if not uploaded_file.name.endswith('.xlsx'):
+                return Response({'error': 'Invalid file format. Please upload an Excel (.xlsx) file.'}, status=400)
+
+            try:
+                # Read the Excel file
+                df = pd.read_excel(uploaded_file, skiprows=2)
+                df2 = pd.DataFrame()
+                df2['summa'] = df['Сумма (Регл.)']
+                df2['number'] = df['Документ движения'].str.extract(r'№ (\d+)')
+                df2.dropna(inplace=True)
+
+                # Iterate through the rows and update prices in the database
+                for index, row in df2.iterrows():
+                    document_number = str(row['number'])
+                    price = row['summa']
+
+                    # Update the price for the document number
+                    Docs.objects.filter(doc_num=document_number).update(sum=price)
+
+                return Response({'message': 'Prices updated successfully'})
+
+            except Exception as e:
+                return Response({'error': f'An error occurred: {str(e)}'}, status=500)
+        
+        return Response({'error': 'Invalid request method'}, status=400)
