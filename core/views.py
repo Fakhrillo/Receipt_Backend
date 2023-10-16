@@ -477,7 +477,7 @@ class ImportXlsxFile(APIView):
 
                 # Iterate through the rows and update prices in the database
                 for index, row in df2.iterrows():
-                    document_number = str(row['number'])
+                    document_number = f"№{str(row['number'])}"
                     price = row['summa']
 
                     # Update the price for the document number
