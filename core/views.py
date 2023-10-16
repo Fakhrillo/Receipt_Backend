@@ -317,26 +317,38 @@ class WorkersSummaryView(APIView):
             # Filter checks for the worker on the specified date
             if selected_date:
                 worker_checks = Checks.objects.filter(worker=worker, date__date=selected_date.date(), issubmitted=True)
+                worker_docs = Docs.objects.filter(worker=worker, date__date=selected_date.date(), issubmitted=True)
 
             else:
                 s_date = datetime.strptime(start_date, '%Y-%m-%d')
                 e_date = datetime.strptime(end_date, '%Y-%m-%d')
                 worker_checks = Checks.objects.filter(worker=worker, date__date__gte=s_date, date__date__lte=e_date, issubmitted=True)
+                worker_docs = Docs.objects.filter(worker=worker, date__date__gte=s_date, date__date__lte=e_date, issubmitted=True)
                 
             total_checks = worker_checks.count()
             total_check_sum = worker_checks.aggregate(Sum('sum'))['sum__sum']
+
+            total_docs = worker_docs.count()
+            total_doc_sum = worker_docs.aggregate(Sum('sum'))['sum__sum']
+
             if total_check_sum == None:
                 total_check_sum = 0
+            if total_doc_sum == None:
+                total_doc_sum = 0
+
             data = {
                 'id': worker.id,
                 'name': worker.name,
                 'total_checks': total_checks,
                 'total_check_sum': total_check_sum,
+                'total_docs': total_docs,
+                'total_docs_sum':total_doc_sum,
+                'total_sum': total_doc_sum+total_check_sum,
                 'branch_name': BranchSerializer(worker.branch).data['name']
             }
             summary_data.append(data)
         
-        sorted_list_desc = sorted(summary_data, key=lambda x: x['total_check_sum'], reverse=True)
+        sorted_list_desc = sorted(summary_data, key=lambda x: x['total_sum'], reverse=True)
         return Response(sorted_list_desc, status=200)
 
 class BranchesSummaryView(APIView):

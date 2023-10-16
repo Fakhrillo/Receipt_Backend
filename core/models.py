@@ -41,6 +41,7 @@ class Checks(models.Model):
 
 class Docs(models.Model):
     doc_num = models.CharField(max_length=255, unique=True)
+    sum = models.CharField(max_length=255, default=0, blank=True, null=True)
     date = models.DateTimeField(auto_now_add=True)
     worker = models.ForeignKey(Workers, null=True, on_delete=models.SET_NULL)
     branch = models.ForeignKey(Branches, on_delete=models.CASCADE)

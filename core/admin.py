@@ -12,7 +12,7 @@ class ChecksAdmin(admin.ModelAdmin):
     list_display = ['check_num', 'sum', 'worker', 'branch', 'date', 'image', 'issubmitted',]
 
 class DocsAdmin(admin.ModelAdmin):
-    list_display = ['doc_num', 'worker', 'branch', 'date', 'image', 'issubmitted',]
+    list_display = ['doc_num', 'sum', 'worker', 'branch', 'date', 'image', 'issubmitted',]
 
 
 admin.site.register(Branches, BranchAdmin)
