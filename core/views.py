@@ -350,9 +350,9 @@ class WorkersSummaryView(APIView):
             }
             summary_data.append(data)
         
-        sorted_list_desc = sorted(summary_data, key=lambda x: x['total_sum'], reverse=True)
-        for item in sorted_list_desc:
-            item['total_sum'] = '{:,}'.format(total_sum)
+            sorted_list_desc = sorted(summary_data, key=lambda x: x['total_sum'], reverse=True)
+            for item in sorted_list_desc:
+                item['total_sum'] = '{:,}'.format(total_sum)
             
         return Response(sorted_list_desc, status=200)
 
