@@ -339,12 +339,12 @@ class WorkersSummaryView(APIView):
             data = {
                 'id': worker.id,
                 'name': worker.name,
+                'branch_name': BranchSerializer(worker.branch).data['name'],
                 'total_checks': total_checks,
-                'total_check_sum': total_check_sum,
                 'total_docs': total_docs,
+                'total_check_sum': total_check_sum,
                 'total_docs_sum':total_doc_sum,
                 'total_sum': total_doc_sum+total_check_sum,
-                'branch_name': BranchSerializer(worker.branch).data['name']
             }
             summary_data.append(data)
         
@@ -475,14 +475,25 @@ class ImportXlsxFile(APIView):
                 df2['number'] = df['Документ движения'].str.extract(r'№ (\d+)')
                 df2.dropna(inplace=True)
 
+                datas = {}
+
                 # Iterate through the rows and update prices in the database
                 for index, row in df2.iterrows():
                     document_number = f"№{str(row['number'])}"
                     price = row['summa']
 
+                    datas[document_number]=price
                     # Update the price for the document number
-                    Docs.objects.filter(doc_num=document_number).update(sum=price)
+                    # Docs.objects.filter(doc_num=document_number).update(sum=price)
+                # return Response(datas)
+                print(datas)
 
+                docs = Docs.objects.filter(sum=0)
+                for doc in docs:
+                    try:
+                        doc.update(sum = datas[doc.doc_num])
+                    except:
+                        pass
                 return Response({'message': 'Prices updated successfully'})
 
             except Exception as e:
