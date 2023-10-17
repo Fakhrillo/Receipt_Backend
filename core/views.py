@@ -413,6 +413,7 @@ class BranchesSummaryView(APIView):
                 'name': branch.name,
                 'total_checks': total_checks,                
                 'total_docs': total_docs,
+                'total_sales': total_checks + total_docs,
                 'total_check_sum': '{:,}'.format(total_check_sum),
                 'total_doc_sum': '{:,}'.format(total_doc_sum),
                 'total_sum': int(total_doc_sum+total_check_sum),
