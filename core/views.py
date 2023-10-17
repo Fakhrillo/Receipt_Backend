@@ -402,8 +402,8 @@ class BranchesSummaryView(APIView):
             total_checks = branch_checks.count()
             total_check_sum = branch_checks.aggregate(Sum('sum'))['sum__sum']
 
-            total_docs = branch_checks.count()
-            total_doc_sum = branch_checks.aggregate(Sum('sum'))['sum__sum']
+            total_docs = branch_docs.count()
+            total_doc_sum = branch_docs.aggregate(Sum('sum'))['sum__sum']
             
             if total_check_sum == None:
                 total_check_sum = 0
