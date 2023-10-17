@@ -407,6 +407,9 @@ class BranchesSummaryView(APIView):
             
             if total_check_sum == None:
                 total_check_sum = 0
+
+            if total_doc_sum == None:
+                total_doc_sum = 0
             
             data = {
                 'id': branch.id,
