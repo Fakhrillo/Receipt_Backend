@@ -346,11 +346,14 @@ class WorkersSummaryView(APIView):
                 'total_docs': total_docs,
                 'total_check_sum': total_check_sum,
                 'total_docs_sum':total_doc_sum,
-                'total_sum': '{:,}'.format(total_sum),
+                'total_sum': total_sum,
             }
             summary_data.append(data)
         
         sorted_list_desc = sorted(summary_data, key=lambda x: x['total_sum'], reverse=True)
+        for item in sorted_list_desc:
+            item['total_sum'] = '{:,}'.format(total_sum)
+            
         return Response(sorted_list_desc, status=200)
 
 class BranchesSummaryView(APIView):
