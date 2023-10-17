@@ -336,8 +336,6 @@ class WorkersSummaryView(APIView):
             if total_doc_sum == None:
                 total_doc_sum = 0
 
-            total_sum = total_doc_sum+total_check_sum
-
             data = {
                 'id': worker.id,
                 'name': worker.name,
@@ -346,7 +344,7 @@ class WorkersSummaryView(APIView):
                 'total_docs': total_docs,
                 'total_check_sum': total_check_sum,
                 'total_docs_sum':total_doc_sum,
-                'total_sum': total_sum,
+                'total_sum': total_doc_sum+total_check_sum,
             }
             summary_data.append(data)
         
