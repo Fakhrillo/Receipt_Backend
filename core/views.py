@@ -253,9 +253,10 @@ class DocListCreateView(generics.ListCreateAPIView):
         elif start_date:
             queryset = queryset.filter(date__gte=start_date)
         
-        total_checks = queryset.count()
+        total_docs = queryset.count()
+        total_doc_sum = queryset.aggregate(Sum('sum'))['sum__sum']
 
-        b = {'total_checks': total_checks}
+        b = {'total_checks': total_docs, 'total_sum': total_doc_sum}
 
         a=DocsSerializer(queryset, many=True).data
 
