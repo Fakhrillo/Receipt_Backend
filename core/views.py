@@ -491,7 +491,8 @@ class ImportXlsxFile(APIView):
                 docs = Docs.objects.filter(sum=0)
                 for doc in docs:
                     try:
-                        doc.update(sum = datas[doc.doc_num])
+                        doc.sum = datas[doc.doc_num]
+                        doc.save()
                     except:
                         pass
                 return Response({'message': 'Prices updated successfully'})
