@@ -343,8 +343,8 @@ class WorkersSummaryView(APIView):
                 'branch_name': BranchSerializer(worker.branch).data['name'],
                 'total_checks': total_checks,
                 'total_docs': total_docs,
-                'total_check_sum': total_check_sum,
-                'total_docs_sum':total_doc_sum,
+                'total_check_sum': '{:,}'.format(total_check_sum),
+                'total_doc_sum': '{:,}'.format(total_doc_sum),
                 'total_sum': int(total_doc_sum+total_check_sum),
             }
             summary_data.append(data)
@@ -391,25 +391,37 @@ class BranchesSummaryView(APIView):
             # Filter checks for the worker on the specified date
             if selected_date:
                 branch_checks = Checks.objects.filter(branch=branch, date__date=selected_date.date(), issubmitted=True)
+                branch_docs = Docs.objects.filter(branch=branch, date__date=selected_date.date(), issubmitted=True)
 
             else:
                 s_date = datetime.strptime(start_date, '%Y-%m-%d')
                 e_date = datetime.strptime(end_date, '%Y-%m-%d')
                 branch_checks = Checks.objects.filter(branch=branch, date__date__gte=s_date, date__date__lte=e_date, issubmitted=True)
+                branch_docs = Docs.objects.filter(branch=branch, date__date__gte=s_date, date__date__lte=e_date, issubmitted=True)
                 
             total_checks = branch_checks.count()
             total_check_sum = branch_checks.aggregate(Sum('sum'))['sum__sum']
+
+            total_docs = branch_checks.count()
+            total_doc_sum = branch_checks.aggregate(Sum('sum'))['sum__sum']
+            
             if total_check_sum == None:
                 total_check_sum = 0
+            
             data = {
                 'id': branch.id,
                 'name': branch.name,
-                'total_checks': total_checks,
-                'total_check_sum': total_check_sum,
+                'total_checks': total_checks,                
+                'total_docs': total_docs,
+                'total_check_sum': '{:,}'.format(total_check_sum),
+                'total_doc_sum': '{:,}'.format(total_doc_sum),
+                'total_sum': int(total_doc_sum+total_check_sum),
             }
 
             summary_data.append(data)
         sorted_list_desc = sorted(summary_data, key=lambda x: x['total_check_sum'], reverse=True)
+        for item in sorted_list_desc:
+            item['total_sum'] = '{:,}'.format(item['total_sum'])
         return Response(sorted_list_desc, status=200)
     
 class EditedTextsCheck(generics.RetrieveUpdateDestroyAPIView):
