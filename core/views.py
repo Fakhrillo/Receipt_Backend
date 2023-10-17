@@ -486,7 +486,6 @@ class ImportXlsxFile(APIView):
                     # Update the price for the document number
                     # Docs.objects.filter(doc_num=document_number).update(sum=price)
                 # return Response(datas)
-                print(datas)
 
                 docs = Docs.objects.filter(sum=0)
                 for doc in docs:
